@@ -1,0 +1,310 @@
+$hColor: #ffbf19;
+
+.fontArial {
+	font-family: Arial, sans-serif;
+}
+
+.h1 {
+	color: $hColor;
+	text-align: center;
+	font-size: 25px;
+}
+.logoImg {
+	// Ведрофон
+	@media (max-width: 767px) {
+		position: absolute;
+		width: 100%;
+		height: 50px;
+	}
+	// ПК
+	@media (min-width: 768px) {
+		width: 575px;
+		height: 50px;
+		position: absolute;
+	}
+}
+
+.applyFormImg {
+	@media (max-width: 767px) {
+		width: 60%;
+		height: 75px;
+		position: absolute;
+		top: 60px;
+	}
+	@media (min-width: 768px) {
+		width: 300px;
+		height: 120px;
+		position: absolute;
+		top: 65px;
+	}
+}
+
+.listenGimnImg {
+	@media (max-width: 767px) {
+		width: 50%;
+		height: 65px;
+		position: absolute;
+		top: 142px;
+		left: 50%;
+		transform: translate(-50%);
+	}
+	@media (min-width: 768px) {
+		width: 240px;
+		height: 95px;
+		position: absolute;
+		top: 90px;
+		left: 1.8rem;
+	}
+	&:active {
+		box-shadow: inset 0 1 8px rgba(25, 171, 255, 0.3);
+	}
+}
+
+.gerbImg {
+	@media (max-width: 767px) {
+		width: 75px;
+		height: 90px;
+		position: absolute;
+		top: 129px;
+		left: 5px;
+	}
+	@media (min-width: 768px) {
+		width: 190px;
+		height: 250px;
+		position: absolute;
+		top: 200px;
+		left: 3rem;
+	}
+}
+
+.reportImg {
+	@media (max-width: 767px) {
+		width: 100px;
+		height: 50px;
+		position: absolute;
+		top: 210px;
+		left: 50%;
+		transform: translate(-50%);
+	}
+	@media (min-width: 768px) {
+		width: 220px;
+		height: 80px;
+		position: absolute;
+		top: 70px;
+		right: 1.8rem;
+	}
+}
+
+.runetImg {
+	@media (max-width: 767px) {
+		width: 200px;
+		height: 150px;
+		position: absolute;
+		top: 270px;
+		left: 50%;
+		transform: translate(-50%);
+	}
+	@media (min-width: 768px) {
+		width: 220px;
+		height: 200px;
+		position: absolute;
+		top: 310px;
+		right: 1.8rem;
+	}
+}
+
+.dieImg {
+	@media (max-width: 767px) {
+		width: 200px;
+		height: 150px;
+		position: absolute;
+		top: 810px;
+		left: 50%;
+		transform: translate(-50%);
+	}
+	@media (min-width: 768px) {
+		width: 200px;
+		position: absolute;
+		top: 158px;
+		right: 1.8rem;
+	}
+}
+
+// FORM
+.form {
+	position: absolute;
+	display: block;
+	text-align: center;
+	padding: 10px 0 10px 0;
+	@media (max-width: 767px) {
+		color: #fff;
+		width: 80%;
+		height: 370px;
+		// debug: border: 2px dashed #fff;
+		top: 60vh;
+	}
+	@media (min-width: 768px) {
+		color: #fff;
+		width: 385px;
+		height: 300px;
+		// debug: border: 2px dashed #fff;
+		top: 12rem;
+	}
+	.inputGroup {
+		display: block;
+		.label {
+			display: block;
+			margin-left: 12.5%;
+			margin-bottom: 2px;
+			text-align: left;
+			font-size: 21px;
+		}
+		.input {
+			margin-top: 5px;
+			margin-bottom: 10px;
+			text-align: center;
+			background-color: #fff;
+			color: #000;
+			@media (min-width: 768px) {
+				width: 75%;
+			}
+			&:active,
+			&:hover {
+				background-color: #ccc;
+			}
+		}
+	}
+	.passGroup {
+		position: absolute;
+		.passText {
+			@media (max-width: 767px) {
+				position: relative;
+				margin-top: 22px;
+				margin-left: 28%;
+				text-align: center;
+				// debug: border: 1px dashed yellow;
+				font-size: 22px;
+				width: 180px;
+				height: 80px;
+			}
+			@media (min-width: 768px) {
+				margin-top: 22px;
+				margin-left: 14px;
+				text-align: center;
+				// debug: border: 1px dashed yellow;
+				font-size: 22px;
+				width: 180px;
+				height: 80px;
+			}
+		}
+		.passInput {
+			position: absolute;
+			display: block;
+			// debug: border: 1px solid purple;
+			@media (max-width: 767px) {
+				position: relative;
+				margin: 5px;
+				width: 180px;
+				height: 80px;
+				top: 18px;
+				left: 50px;
+			}
+			@media (min-width: 768px) {
+				margin: 5px;
+				width: 180px;
+				height: 80px;
+				top: 18px;
+				left: 176px;
+			}
+
+			.label1 {
+				position: relative;
+				font-size: 21px;
+				margin-right: 47.3px;
+				left: 11px;
+			}
+			.label2 {
+				position: relative;
+				font-size: 21px;
+				margin-right: 4px;
+				left: -13px;
+			}
+			.input {
+				width: 55px;
+				background-color: #fff;
+				color: #000;
+			}
+		}
+	}
+}
+
+.submit {
+	background-color: #ff8080;
+	color: #fff;
+	border: 2px solid #5d0000;
+	&:hover,
+	&:active {
+		background-color: #5d0000;
+	}
+	@media (max-width: 767px) {
+		position: relative;
+		padding: 0 5px 0 5px;
+		top: 190px;
+	}
+	@media (min-width: 768px) {
+		position: relative;
+		padding: 5px;
+		top: 123px;
+	}
+}
+
+.fPadding {
+	margin-bottom: 50px;
+}
+
+.modalOverlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.modalContent {
+	background-color: #df0003;
+	padding: 30px;
+	border-radius: 10px;
+	text-align: center;
+	max-width: 80%;
+	width: 500px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modalText {
+	color: white;
+	font-size: 18px;
+	line-height: 1.5;
+	margin: 20px 0;
+}
+
+.base-button {
+	background-color: #ff8080;
+	color: #fff;
+	border: 2px solid #5d0000;
+	&:hover,
+	&:active {
+		background-color: #5d0000;
+	}
+	@media (max-width: 767px) {
+		padding: 0 5px 0 5px;
+	}
+	@media (min-width: 768px) {
+		position: relative;
+		padding: 5px;
+	}
+}

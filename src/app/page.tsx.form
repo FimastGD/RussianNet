@@ -1,0 +1,206 @@
+"use client";
+
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Eye, EyeOff, Lock, User, Shield } from 'lucide-react';
+
+export default function AdminLoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    // Имитация запроса к серверу
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsLoading(false);
+    alert('Попытка входа выполнена');
+  };
+
+  const containerVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 30 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut" as const
+      }
+    }
+  };
+
+  const inputVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut" as const
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center p-4">
+      {/* Фоновая анимация */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
+      </div>
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="relative z-10 w-full max-w-md"
+      >
+        {/* Логотип и заголовок */}
+        <motion.div 
+          className="text-center mb-8"
+          variants={inputVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4 shadow-lg">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Админ-панель</h1>
+          <p className="text-blue-200">Войдите в систему управления</p>
+        </motion.div>
+
+        {/* Форма входа */}
+        <motion.div
+          variants={containerVariants}
+          className="bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 p-8"
+        >
+          <div className="space-y-6">
+            {/* Поле Email */}
+            <motion.div
+              variants={inputVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.2 }}
+            >
+              <label htmlFor="email" className="block text-sm font-medium text-blue-200 mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 transition-all duration-200"
+                  placeholder="admin@example.com"
+                  required
+                />
+              </div>
+            </motion.div>
+
+            {/* Поле Password */}
+            <motion.div
+              variants={inputVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.3 }}
+            >
+              <label htmlFor="password" className="block text-sm font-medium text-blue-200 mb-2">
+                Пароль
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-400" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-12 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-slate-400 transition-all duration-200"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Опция "Запомнить меня" */}
+            <motion.div
+              variants={inputVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.4 }}
+              className="flex items-center justify-between"
+            >
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <span className="ml-2 text-sm text-blue-200">Запомнить меня</span>
+              </label>
+              <a href="#" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                Забыли пароль?
+              </a>
+            </motion.div>
+
+            {/* Кнопка входа */}
+            <motion.button
+              variants={inputVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.5 }}
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-blue-800 disabled:to-blue-900 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Вход в систему...
+                </div>
+              ) : (
+                'Войти в админ-панель'
+              )}
+            </motion.button>
+          </div>
+
+          {/* Дополнительная информация */}
+          <motion.div
+            variants={inputVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.6 }}
+            className="mt-6 pt-6 border-t border-slate-700"
+          >
+            <p className="text-center text-xs text-slate-400">
+              Защищено двухфакторной аутентификацией
+            </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Нижний текст */}
+        <motion.p
+          variants={inputVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.7 }}
+          className="text-center text-sm text-blue-300 mt-6"
+        >
+          © 2025 Админ-панель. Все права защищены.
+        </motion.p>
+      </motion.div>
+    </div>
+  );
+}

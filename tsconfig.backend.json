@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./backend",
+    "outDir": "./build",
+    "module": "commonjs",
+    "noEmit": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  },
+  "include": ["backend/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}
