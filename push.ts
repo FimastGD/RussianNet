@@ -10,11 +10,11 @@ const rl = readline.createInterface({
 async function askQuestion(question: string, validator?: (input: string) => string | true): Promise<string> {
 	return new Promise(resolve => {
 		const ask = () => {
-			rl.question(question, answer => {
+			rl.question(`\n${question} `, answer => {
 				if (validator) {
 					const validation = validator(answer);
 					if (validation !== true) {
-						console.log(validation);
+						console.log(`\n${validation}`);
 						return ask();
 					}
 				}
@@ -25,88 +25,90 @@ async function askQuestion(question: string, validator?: (input: string) => stri
 	});
 }
 
-function checkGitRepo(): void {
+async function checkGitSetup() {
 	try {
+		// Проверяем инициализацию Git
 		execSync("git rev-parse --is-inside-work-tree", { stdio: "ignore" });
+
+		// Проверяем наличие origin
+		try {
+			execSync("git remote get-url origin", { stdio: "ignore" });
+		} catch {
+			console.log("\n⚠️ Удалённый репозиторий не настроен");
+			const url = execSync("gh repo view --json url --jq .url", { encoding: "utf-8" }).trim();
+			if (url) {
+				execSync(`git remote add origin ${url}`, { stdio: "inherit" });
+			} else {
+				const repoUrl = await askQuestion("Введите URL удалённого репозитория (git@github.com:user/repo.git):");
+				execSync(`git remote add origin ${repoUrl}`, { stdio: "inherit" });
+			}
+		}
 	} catch {
-		console.error("❌ Это не Git-репозиторий. Сначала запустите init-repo.sh");
+		console.error("\n❌ Это не Git-репозиторий. Сначала выполните:");
+		console.log("git init");
+		console.log("git remote add origin URL_РЕПОЗИТОРИЯ");
 		process.exit(1);
 	}
 }
 
-function getChangedFiles(): string[] {
-	const output = execSync("git status --porcelain", { encoding: "utf-8" });
-	return output
-		.split("\n")
-		.filter(line => line.trim() && !line.includes("node_modules/"))
-		.map(line => line.substring(3).trim());
+async function pushChanges() {
+	try {
+		// Пытаемся сделать обычный push
+		execSync("git push", { stdio: "inherit" });
+	} catch (error) {
+		if (error instanceof Error && error.message.includes("no upstream branch")) {
+			console.log("\n🔧 Настраиваем upstream для ветки...");
+			execSync("git push --set-upstream origin main", { stdio: "inherit" });
+		} else {
+			throw error;
+		}
+	}
 }
 
 async function main() {
-	checkGitRepo();
+	console.clear();
+	console.log("=== Git Push Helper ===\n");
 
 	try {
+		await checkGitSetup();
+
 		if (!existsSync(".gitignore")) {
-			console.log("⚠️ Файл .gitignore не найден. Создаю...");
-			execSync('echo "node_modules/" >> .gitignore');
+			console.log("\n📝 Создаём .gitignore...");
+			execSync('echo "node_modules/\n.env\n*.log\n.DS_Store" > .gitignore', { stdio: "inherit" });
 		}
 
-		const commitName = await askQuestion("Название коммита: ", val => val.trim().length > 0 || "Введите название");
+		const commitName = await askQuestion("Введите название коммита:", val => val.trim().length > 0 || "Название не может быть пустым");
 
-		const commitDesc = await askQuestion("Описание (необязательно): ");
-
+		const commitDesc = await askQuestion("Введите описание (необязательно):");
 		const prefix = await askQuestion(
-			"Префикс коммита ([dev]/[prod]/[fix]/пусто): ",
-			val => !val || ["dev", "prod", "fix"].includes(val) || "Используйте dev, prod, fix или оставьте пустым"
+			"Выберите префикс ([dev]/[prod]/[fix]/[none]):",
+			val => ["dev", "prod", "fix", "none"].includes(val) || "Используйте: dev, prod, fix или none"
 		);
 
-		const prefixStr = prefix ? `[${prefix}] ` : "";
-		const fullMessage = `${prefixStr}${commitName}${commitDesc ? "\n\n" + commitDesc : ""}`;
+		const prefixStr = prefix !== "none" ? `[${prefix}] ` : "";
+		const commitMessage = `${prefixStr}${commitName}${commitDesc ? "\n\n" + commitDesc : ""}`;
 
-		const changedFiles = getChangedFiles();
-		if (changedFiles.length === 0) {
-			console.log("ℹ️ Нет измененных файлов для коммита.");
-			process.exit(0);
-		}
+		console.log("\n📋 Измененные файлы:");
+		execSync("git status --porcelain", { stdio: "inherit" });
 
-		console.log("\nИзмененные файлы:");
-		changedFiles.forEach(file => console.log(`- ${file}`));
-
-		const confirm = await askQuestion("\nПодтвердить коммит? (y/n): ");
+		const confirm = await askQuestion("\nПодтвердить коммит? (y/n):");
 		if (confirm.toLowerCase() !== "y") {
-			console.log("❌ Отменено пользователем");
+			console.log("\n❌ Отменено пользователем");
 			process.exit(0);
 		}
 
 		console.log("\n🔄 Добавляем изменения...");
 		execSync("git add .", { stdio: "inherit" });
 
-		console.log("💾 Создаем коммит...");
-		execSync(`git commit -m "${fullMessage.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+		console.log("\n💾 Создаём коммит...");
+		execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
 
-		console.log("🚀 Отправляем изменения...");
-		try {
-			execSync("git push", { stdio: "inherit" });
-		} catch (pushError) {
-			if (pushError instanceof Error && pushError.message.includes("no upstream branch")) {
-				console.log("⏳ Настраиваем upstream для ветки...");
-				try {
-					execSync("git push --set-upstream origin main", { stdio: "inherit" });
-				} catch (upstreamError) {
-					console.error("❌ Ошибка при настройке upstream:");
-					if (upstreamError instanceof Error) {
-						console.error(upstreamError.message);
-					}
-					process.exit(1);
-				}
-			} else {
-				throw pushError;
-			}
-		}
+		console.log("\n🚀 Отправляем изменения...");
+		await pushChanges();
 
-		console.log("\n✅ Успешно обновлено!");
+		console.log("\n✅ Успешно! Все изменения отправлены в репозиторий.");
 	} catch (error) {
-		console.error("❌ Ошибка:");
+		console.error("\n❌ Критическая ошибка:");
 		if (error instanceof Error) {
 			console.error(error.message);
 		}
