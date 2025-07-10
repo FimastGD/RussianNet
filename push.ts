@@ -54,7 +54,7 @@ async function checkGitSetup() {
 async function pushChanges() {
 	try {
 		// Пытаемся сделать обычный push
-		execSync("git push", { stdio: "inherit" });
+		execSync("git push --set-upstream origin main", { stdio: "inherit" });
 	} catch (error) {
 		if (error instanceof Error && error.message.includes("no upstream branch")) {
 			console.log("\n🔧 Настраиваем upstream для ветки...");
