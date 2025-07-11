@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from "react";
 import styles from "@/styles/base.module.scss";
+import { Random } from "colorside";
 
 export default function RuForm({ ...props }) {
 	const [fio, setFio] = useState("");
@@ -21,6 +22,7 @@ export default function RuForm({ ...props }) {
 		e.preventDefault();
 		console.log(formData.current);
 		console.log(formData.current.fio);
+		console.log(`Random: ${Random.Int(50, 9000)}`);
 	};
 
 	function handleInput(e, type: string): void {
