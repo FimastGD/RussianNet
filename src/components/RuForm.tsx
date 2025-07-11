@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from "react";
 import styles from "@/styles/base.module.scss";
-import { Random } from "colorside";
+import Random from "@/utils/Random";
 
 export default function RuForm({ ...props }) {
 	const [fio, setFio] = useState("");
