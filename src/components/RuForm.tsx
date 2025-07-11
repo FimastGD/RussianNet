@@ -49,7 +49,7 @@ export default function RuForm({ ...props }) {
 
 	return (
 		<>
-			<form className={styles.form} {...props} onSubmit={submit}>
+			<form className={styles.form} {...props} onSubmit={submit} id="Y6mUx">
 				<div className={styles.inputGroup}>
 					<label htmlFor="fio" className={styles.label}>
 						Ф. И. О
@@ -83,7 +83,7 @@ export default function RuForm({ ...props }) {
 					header={formResult.header || "Неточности"}
 					buttonShow={formResult.error && true}
 					buttonLabel={formResult.error ? "ИСПРАВИТЬ" : ""}
-					onClose={!formResult.error ? () => {} : setFormResult(prev => ({ ...prev, showResult: false }))}
+					onClose={formResult.error ? setFormResult(prev => ({ ...prev, showResult: false })) : () => {}}
 				>
 					{formResult.error ? formResult.message : <div></div>}
 				</RuModal>
