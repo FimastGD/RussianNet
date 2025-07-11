@@ -8,6 +8,7 @@ interface RuModalPacket {
 	buttonLabel: string,
 	children: string | React.ReactNode,
 	onClose: () => void;
+	buttonShow?: boolean;
 }
 
 export default function RuModal({header, buttonLabel, children, onClose, buttonShow = true}: RuModalPacket) {
