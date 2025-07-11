@@ -1,121 +1,214 @@
-import { execSync } from "child_process";
-import * as readline from "readline";
-import { existsSync } from "fs";
+import { exec } from "child_process";
+import { promisify } from "util";
+import ColorSide, { ANSI } from "colorside";
+import { ANSI256 } from "colorside/ansi256";
 
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
+const cs = new ColorSide("en");
+cs.use(cs.console);
+cs.use(cs.input);
 
-async function askQuestion(question: string, validator?: (input: string) => string | true): Promise<string> {
-	return new Promise(resolve => {
-		const ask = () => {
-			rl.question(`\n${question} `, answer => {
-				if (validator) {
-					const validation = validator(answer);
-					if (validation !== true) {
-						console.log(`\n${validation}`);
-						return ask();
-					}
-				}
-				resolve(answer);
-			});
-		};
-		ask();
-	});
+const execAsync = promisify(exec);
+
+cs.console.clear();
+
+const COMMIT_NAME_ONLY: unknown = (await cs.input.readtext({
+	message: "Enter commit name:",
+	messageColor: ANSI.format.bold + ANSI.fg.bright.cyan,
+	prefix: cs.fg.bright.blue(">"),
+	answerColor: ANSI.fg.white
+})) as string;
+
+const COMMIT_PREFIX: unknown = (await cs.input.readlist({
+	message: "Enter commit prefix:",
+	answerColor: ANSI.fg.bright.white,
+	prefix: cs.fg.bright.blue(">"),
+	messageColor: ANSI.format.bold + ANSI.fg.bright.cyan,
+	choices: [
+		{ name: "[dev]", value: "[dev]" },
+		{ name: "[prod]", value: "[prod]" },
+		{ name: "[fix]", value: "[fix]" },
+		{ name: "[test]", value: "[test]" },
+		{ name: "Without prefix", value: "no" }
+	],
+	selectColors: [{ keys: ["Without prefix"], color: ANSI256.get.fg("#ff7878") }]
+})) as string;
+
+const COMMIT_NAME: string = String(COMMIT_PREFIX !== "no" ? COMMIT_PREFIX : "") + " " + String(COMMIT_NAME_ONLY);
+// Константы для коммита
+// const COMMIT_NAME = "Fix user authentication bug";
+/*const COMMIT_DESC: string | null = `- Fixed login validation logic
+- Added proper error handling for invalid credentials
+- Updated user session management
+- Added unit tests for auth service`;*/
+const COMMIT_DESC: string | null = null;
+
+// Альтернативный пример с null описанием
+// const COMMIT_NAME = "Update README";
+// const COMMIT_DESC: string | null = null;
+
+interface GitPushResult {
+	success: boolean;
+	message: string;
+	stdout?: string;
+	stderr?: string;
 }
 
-async function checkGitSetup() {
-	try {
-		// Проверяем инициализацию Git
-		execSync("git rev-parse --is-inside-work-tree", { stdio: "ignore" });
+class GitAutoPush {
+	private projectPath: string;
+	private branch: string;
 
-		// Проверяем наличие origin
+	constructor(projectPath: string = process.cwd(), branch: string = "main") {
+		this.projectPath = projectPath;
+		this.branch = branch;
+	}
+
+	/**
+	 * Выполняет команду git в указанной директории
+	 */
+	private async executeGitCommand(command: string): Promise<{ stdout: string; stderr: string }> {
 		try {
-			execSync("git remote get-url origin", { stdio: "ignore" });
-		} catch {
-			console.log("\n⚠️ Удалённый репозиторий не настроен");
-			const url = execSync("gh repo view --json url --jq .url", { encoding: "utf-8" }).trim();
-			if (url) {
-				execSync(`git remote add origin ${url}`, { stdio: "inherit" });
-			} else {
-				const repoUrl = await askQuestion("Введите URL удалённого репозитория (git@github.com:user/repo.git):");
-				execSync(`git remote add origin ${repoUrl}`, { stdio: "inherit" });
+			const { stdout, stderr } = await execAsync(command, {
+				cwd: this.projectPath,
+				maxBuffer: 1024 * 1024 // 1MB buffer
+			});
+			return { stdout, stderr };
+		} catch (error: any) {
+			throw new Error(`Git command failed: ${error.message}`);
+		}
+	}
+
+	/**
+	 * Формирует commit message с описанием или без
+	 */
+	private buildCommitMessage(title: string, description: string | null): string {
+		if (description) {
+			// Экранируем кавычки в описании
+			const escapedDesc = description.replace(/"/g, '\\"');
+			return `"${title}" -m "${escapedDesc}"`;
+		}
+		return `"${title}"`;
+	}
+
+	/**
+	 * Проверяет статус репозитория
+	 */
+	async checkStatus(): Promise<string> {
+		const { stdout } = await this.executeGitCommand("git status --porcelain");
+		return stdout.trim();
+	}
+
+	/**
+	 * Добавляет все изменения в staging
+	 */
+	async addChanges(): Promise<void> {
+		await this.executeGitCommand("git add -A");
+		console.log("✓ Changes added to staging");
+	}
+
+	/**
+	 * Создает коммит
+	 */
+	async createCommit(title: string, description: string | null): Promise<void> {
+		const commitMessage = this.buildCommitMessage(title, description);
+		const command = `git commit -m ${commitMessage}`;
+
+		await this.executeGitCommand(command);
+		console.log(`✓ Commit created: ${title}`);
+	}
+
+	/**
+	 * Пушит изменения в remote репозиторий
+	 */
+	async pushToRemote(): Promise<void> {
+		const command = `git push origin ${this.branch}`;
+		const { stdout, stderr } = await this.executeGitCommand(command);
+
+		if (stderr && !stderr.includes("up-to-date")) {
+			console.log("Push output:", stderr);
+		}
+		console.log("✓ Changes pushed to remote repository");
+	}
+
+	/**
+	 * Основная функция для автоматического пуша
+	 */
+	async autoPush(commitName: string, commitDesc: string | null): Promise<GitPushResult> {
+		try {
+			console.log("🚀 Starting auto push process...");
+
+			// Проверяем есть ли изменения
+			const status = await this.checkStatus();
+			if (!status) {
+				return {
+					success: false,
+					message: "No changes detected to commit"
+				};
 			}
+
+			console.log("📝 Changes detected:");
+			console.log(status);
+
+			// Добавляем все изменения
+			await this.addChanges();
+
+			// Создаем коммит
+			await this.createCommit(commitName, commitDesc);
+
+			// Пушим в remote
+			await this.pushToRemote();
+
+			return {
+				success: true,
+				message: "Successfully pushed changes to remote repository"
+			};
+		} catch (error: any) {
+			return {
+				success: false,
+				message: `Error during git operations: ${error.message}`,
+				stderr: error.message
+			};
 		}
-	} catch {
-		console.error("\n❌ Это не Git-репозиторий. Сначала выполните:");
-		console.log("git init");
-		console.log("git remote add origin URL_РЕПОЗИТОРИЯ");
-		process.exit(1);
+	}
+
+	/**
+	 * Показывает последние коммиты
+	 */
+	async showRecentCommits(count: number = 5): Promise<void> {
+		try {
+			const { stdout } = await this.executeGitCommand(`git log --oneline -${count}`);
+			console.log("\n📋 Recent commits:");
+			console.log(stdout);
+		} catch (error) {
+			console.error("Error showing commits:", error);
+		}
 	}
 }
 
-async function pushChanges() {
-	try {
-		// Пытаемся сделать обычный push
-		execSync("git push --set-upstream origin main", { stdio: "inherit" });
-	} catch (error) {
-		if (error instanceof Error && error.message.includes("no upstream branch")) {
-			console.log("\n🔧 Настраиваем upstream для ветки...");
-			execSync("git push --set-upstream origin main", { stdio: "inherit" });
-		} else {
-			throw error;
-		}
-	}
-}
-
+// Использование
 async function main() {
-	console.clear();
-	console.log("=== Git Push Helper ===\n");
+	const gitPush = new GitAutoPush("/path/to/your/project", "main");
 
 	try {
-		await checkGitSetup();
+		// Выполняем автоматический пуш
+		const result = await gitPush.autoPush(COMMIT_NAME, COMMIT_DESC);
 
-		if (!existsSync(".gitignore")) {
-			console.log("\n📝 Создаём .gitignore...");
-			execSync('echo "node_modules/\n.env\n*.log\n.DS_Store" > .gitignore', { stdio: "inherit" });
+		if (result.success) {
+			console.log("✅", result.message);
+
+			// Показываем последние коммиты
+			await gitPush.showRecentCommits();
+		} else {
+			console.error("❌", result.message);
 		}
-
-		const commitName = await askQuestion("Введите название коммита:", val => val.trim().length > 0 || "Название не может быть пустым");
-
-		const commitDesc = await askQuestion("Введите описание (необязательно):");
-		const prefix = await askQuestion(
-			"Выберите префикс ([dev]/[prod]/[fix]/[none]):",
-			val => ["dev", "prod", "fix", "none"].includes(val) || "Используйте: dev, prod, fix или none"
-		);
-
-		const prefixStr = prefix !== "none" ? `[${prefix}] ` : "";
-		const commitMessage = `${prefixStr}${commitName}${commitDesc ? "\n\n" + commitDesc : ""}`;
-
-		console.log("\n📋 Измененные файлы:");
-		execSync("git status --porcelain", { stdio: "inherit" });
-
-		const confirm = await askQuestion("\nПодтвердить коммит? (y/n):");
-		if (confirm.toLowerCase() !== "y") {
-			console.log("\n❌ Отменено пользователем");
-			process.exit(0);
-		}
-
-		console.log("\n🔄 Добавляем изменения...");
-		execSync("git add .", { stdio: "inherit" });
-
-		console.log("\n💾 Создаём коммит...");
-		execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
-
-		console.log("\n🚀 Отправляем изменения...");
-		await pushChanges();
-
-		console.log("\n✅ Успешно! Все изменения отправлены в репозиторий.");
 	} catch (error) {
-		console.error("\n❌ Критическая ошибка:");
-		if (error instanceof Error) {
-			console.error(error.message);
-		}
-		process.exit(1);
-	} finally {
-		rl.close();
+		console.error("💥 Unexpected error:", error);
 	}
 }
 
-main();
+// Экспорт для использования как модуль
+export { GitAutoPush, COMMIT_NAME, COMMIT_DESC };
+
+// Запуск если файл выполняется напрямую
+if (require.main === module) {
+	main();
+}

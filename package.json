@@ -2,6 +2,7 @@
   "name": "russiannet",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev2": "next dev --turbopack",
     "build2": "next build",
