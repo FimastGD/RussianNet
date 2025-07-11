@@ -1,11 +1,12 @@
 "use client";
 
+import React from "react";
 import styles from "@/styles/base.module.scss";
 
 interface RuModalPacket {
 	header: string,
 	buttonLabel: string,
-	children: string,
+	children: string | React.ReactNode,
 	onClose: () => void;
 }
 
