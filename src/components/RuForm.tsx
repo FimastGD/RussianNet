@@ -21,7 +21,7 @@ export default function RuForm({ ...props }) {
 	const [fiofsb, setFiofsb] = useState("");
 	const [passNum, setPassNum] = useState("");
 	const [passSer, setPassSer] = useState("");
-	const [formResult, setFormResult] = useState<FormResult>({ error: false, Header: "", message: "", showResult: false });
+	const [formResult, setFormResult] = useState<FormResult>({ error: false, header: "", message: "", showResult: false });
 
 	const formData = useRef({ fio: fio, fiofsb: fiofsb, passNum: passNum, passSer: passSer });
 
@@ -37,7 +37,8 @@ export default function RuForm({ ...props }) {
 		// console.log(formData.current.fio);
 		// console.log(`Random: ${Random.Int(50, 9000)}`);
 		/// setFormResult(prev => ({ ...prev, showResult: true }));
-		setFormResult(prev => ({...prev, error: "Ошибка...", message: "Ошибка!", showResult: true}))
+		setFormResult(prev => ({...prev, error: "Ошибка...", message: "Ошибка!", showResult: true}));
+		console.log("handled");
 	};
 
 	function handleInput(e, type: string): void {
