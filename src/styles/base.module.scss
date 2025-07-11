@@ -241,6 +241,7 @@ $hColor: #ffbf19;
 .submit {
 	background-color: #ff8080;
 	color: #fff;
+	cursor: pointer;
 	border: 2px solid #5d0000;
 	&:hover,
 	&:active {
@@ -308,3 +309,39 @@ $hColor: #ffbf19;
 		padding: 5px;
 	}
 }
+
+
+/* БАЗОВАЯ КНОПКА HTML .html-button {
+	// Сброшенные стили (базовое состояние)
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+
+	// Возвращаем оригинальные стили кнопки
+	background-color: #e0e0e0; // Светло-серый фон как у стандартной кнопки
+	border: 1px solid #767676; // Граница как у стандартной кнопки
+	border-radius: 2px; // Скругление углов
+	padding: 1px 6px; // Внутренние отступы
+	font: -webkit-small-control; // Шрифт по умолчанию для кнопок
+	font-size: 13.3333px; // Размер шрифта по умолчанию
+	color: #000000; // Цвет текста
+
+	// Стили при наведении и активности
+	&:hover {
+		background-color: #d3d3d3;
+	}
+
+	&:active {
+		background-color: #b5b5b5;
+		border-color: #5a5a5a;
+	}
+
+	&:focus {
+		box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1); // Легкая тень при фокусе
+	}
+}
+*/
