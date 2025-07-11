@@ -37,7 +37,7 @@ export default function RuForm({ ...props }) {
 		// console.log(formData.current.fio);
 		// console.log(`Random: ${Random.Int(50, 9000)}`);
 		/// setFormResult(prev => ({ ...prev, showResult: true }));
-		setFormResult(prev => ({...prev, error: "Ошибка...", message: "Ошибка!"}))
+		setFormResult(prev => ({...prev, error: "Ошибка...", message: "Ошибка!", showResult: true}))
 	};
 
 	function handleInput(e, type: string): void {
