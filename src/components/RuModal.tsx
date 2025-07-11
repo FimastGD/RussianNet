@@ -9,7 +9,7 @@ interface RuModalPacket {
 	onClose: () => void;
 }
 
-export default function RuModal({header, buttonLabel, children, onClose}: RuModalPacket) {
+export default function RuModal({header, buttonLabel, children, onClose, buttonShow = true}: RuModalPacket) {
 	return (
 		<div className={styles.modalOverlay}>
 			<div className={styles.modalContent}>
@@ -17,9 +17,9 @@ export default function RuModal({header, buttonLabel, children, onClose}: RuModa
 				<p className={styles.modalText}>
 					{children}
 				</p>
-				<button className={styles["base-button"]} onClick={() => onClose()}>
+				{ buttonShow && ( <button className={styles["base-button"]} onClick={() => onClose()}>
 					{buttonLabel}
-				</button>
+				</button> ) }
 			</div>
 		</div>
 	);

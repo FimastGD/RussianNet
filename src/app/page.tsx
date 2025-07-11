@@ -8,6 +8,7 @@ import RuForm from "@/components/RuForm";
 import RuModal from "@/components/RuModal";
 import Navigation from "@/components/Navigation";
 import Swal from "sweetalert2";
+import Random from "@/utils/Random";
 import styles from "@/styles/base.module.scss";
 
 // Импорт изображений
@@ -22,8 +23,13 @@ import dieImg from "../../public/rn5.jpg";
 export default function Home() {
 	const { toggleSound, isPlaying, stopMusic } = useSound();
 	const [showCookieModal, setShowCookieModal] = useState(false);
+	const [loadingModal, setLoadingModal] = useState(false);
+	const [queue, setQueue] = useState(0);
 
 	useEffect(() => {
+		setInterval(() => {
+			setQueue(Random.Int(1, 1000));
+		}, 100);
 		const checkFirstLoad = async () => {
 			try {
 				const response = await fetch("/api/firstLoad");
@@ -71,6 +77,9 @@ export default function Home() {
 					соглашаетесь с использованием печенья.
 				</RuModal>
 			)}
+			{/* <RuModal header="" buttonLabel="42" onClose={() => setShowCookieModal(false)}>
+				{queue}
+			</RuModal> */}
 		</div>
 	);
 }
