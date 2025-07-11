@@ -83,7 +83,7 @@ export default function RuForm({ ...props }) {
 					header={formResult.header || "Неточности"}
 					buttonShow={formResult.error && true}
 					buttonLabel={formResult.error ? "ИСПРАВИТЬ" : ""}
-					onClose={formResult.error ? () => {} : setFormResult(prev => ({ ...prev, showResult: false }))}
+					onClose={!formResult.error ? () => {} : setFormResult(prev => ({ ...prev, showResult: false }))}
 				>
 					{formResult.error ? formResult.message : <div></div>}
 				</RuModal>
