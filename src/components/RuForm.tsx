@@ -72,11 +72,12 @@ export default function RuForm({ ...props }) {
 			}
 		}
 
-		if (formData.current.fio.length < 5 || formData.current.fiofsb.length < 5) {
-			error = "Введите корректно Ф.И.О / Ф.И.О. куратора ФСБ";
-		}
+		
 		if (formData.current.fio.split(" ").length !== 3 || formData.current.fiofsb.split(" ").length !== 3) {
 			error = "Введите фамилию, имя и отчество через пробел";
+		}
+		if (String(formData.current.fio).length < 5 || String(formData.current.fiofsb).length < 5) {
+			error = "Введите корректно Ф.И.О / Ф.И.О. куратора ФСБ";
 		}
 
 		if (error !== "") {
@@ -106,12 +107,12 @@ export default function RuForm({ ...props }) {
 					<label htmlFor="fio" className={styles.label}>
 						Ф. И. О
 					</label>
-					<input type="text" id="fio" className={styles.input} value={fio} onChange={e => handleInput(e, "fio")} />
+					<input type="text" required id="fio" className={styles.input} value={fio} onChange={e => handleInput(e, "fio")} />
 
 					<label htmlFor="fiofsb" className={styles.label}>
 						Ф. И. О. КУРАТОРА ФСБ
 					</label>
-					<input type="text" id="fiofsb" className={styles.input} value={fiofsb} onChange={e => handleInput(e, "fiofsb")} />
+					<input type="text" required id="fiofsb" className={styles.input} value={fiofsb} onChange={e => handleInput(e, "fiofsb")} />
 				</div>
 				<div className={styles.passGroup}>
 					<div className={styles.passText}>ПАСПОРТНЫЕ ДАННЫЕ</div>
@@ -127,6 +128,7 @@ export default function RuForm({ ...props }) {
 							className={styles.input}
 							value={passNum}
 							onChange={e => handleInput(e, "passNum")}
+							required
 						/>
 						<label htmlFor="passser" className={styles.label2}>
 							СЕРИЯ
@@ -139,6 +141,7 @@ export default function RuForm({ ...props }) {
 							className={styles.input}
 							value={passSer}
 							onChange={e => handleInput(e, "passSer")}
+							required
 						/>
 					</div>
 				</div>
