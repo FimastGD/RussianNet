@@ -46,10 +46,10 @@ export default function RuForm({ ...props }) {
 		message: "", 
 		showResult: false 
 	});
-	const [successModal, setSuccessModal] = useState<SuccessModal>{
+	const [successModal, setSuccessModal] = useState<SuccessModal>({
 		header: "Ожидайте",
 		description: ""
-	}
+	});
 	
 	let queueIn: int = t.int(0);
 	const formRef = useRef<HTMLFormElement>(null);
