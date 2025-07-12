@@ -4,7 +4,7 @@ import React from "react";
 import styles from "@/styles/base.module.scss";
 
 interface RuModalPacket {
-	header: string;
+	header: string | React.ReactNode;
 	buttonLabel: string;
 	children: string | React.ReactNode;
 	onClose: () => void;

@@ -9,6 +9,7 @@ type Error = string | false;
 type Header<Extends> = Extends;
 type bool = true | false;
 type char = string;
+type int = number;
 
 interface FormResult {
 	error: Error;
@@ -17,24 +18,49 @@ interface FormResult {
 	showResult: bool;
 }
 
+interface SuccessModal {
+	header: string;
+	description: string | React.ReactNode;
+}
+
+const t: {int: (number) => number} = {
+	int: (num) => {
+		if (String(num).includes(".")) {
+			console.error("Type 'int' is not assignable to type 'number'");
+			return 0;
+		} else {
+			return num;
+		}
+	}
+}
+
 export default function RuForm({ ...props }) {
 	const [fio, setFio] = useState("");
 	const [fiofsb, setFiofsb] = useState("");
 	const [passNum, setPassNum] = useState("");
 	const [passSer, setPassSer] = useState("");
+	const [queue, setQueue] = useState<int>(0);
 	const [formResult, setFormResult] = useState<FormResult>({ 
 		error: false, 
 		header: "", 
 		message: "", 
 		showResult: false 
 	});
-
+	const [successModal, setSuccessModal] = useState<SuccessModal>{
+		header: "Ожидайте",
+		description: ""
+	}
+	
+	let queueIn: int = t.int(0);
 	const formRef = useRef<HTMLFormElement>(null);
 	const formData = useRef({ fio, fiofsb, passNum, passSer });
 
 	useEffect(() => {
 		formData.current = { fio, fiofsb, passNum, passSer };
 	}, [fio, fiofsb, passNum, passSer]);
+	useEffect(() => {
+		queueIn = queue;
+	}, [queue]);
 
 	const submit = (e: FormEvent) => {
 		e.preventDefault();
@@ -65,12 +91,28 @@ export default function RuForm({ ...props }) {
 			});
 			return;
 		}
+		
+		const Queue: int = t.int(Random.Int(50, 150))
+		let $i_interval_Xt6k: int = t.int(Queue); 
+	
+		if (Queue >= 50 && Queue <= 150) {
+			const queueInterval = setInterval(() => {
+				if ($i_interval_Xt6k <= 0) {
+					clearInterval(queueInterval);
+					setSuccessModal(prev => ({header: "Успешно", description: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ"}));
+				}
+				setQueue($i_interval_Xt6k);
+				setSuccessModal(prev => ({...prev, description: <>Наши сверхбыстрые сервера обрабатывают запросы<br/>Очередь: {queue}</>}))
+				$i_interval_Xt6k--;
+			}, 1000)
+		}
 
-		// Если все проверки пройдены
+		// если все проверки пройдены
+		
 		setFormResult({
 			error: false,
-			header: "Ожидайте",
-			message: <div>Проходка</div>,
+			header: <>{successModal.header}</>,
+			message: <>{successModal.description}</>,
 			showResult: true
 		});
 	};
