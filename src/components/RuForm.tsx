@@ -8,6 +8,7 @@ import RuModal from "@/components/RuModal";
 type Error = string | false;
 type Header<Extends> = Extends;
 type bool = true | false;
+type char = string;
 
 interface FormResult {
 	error: Error;
@@ -37,8 +38,52 @@ export default function RuForm({ ...props }) {
 		// console.log(formData.current.fio);
 		// console.log(`Random: ${Random.Int(50, 9000)}`);
 		/// setFormResult(prev => ({ ...prev, showResult: true }));
-		setFormResult(prev => ({...prev, error: "Ошибка...", message: "Ошибка!", showResult: true}));
-		console.log("handled");
+		
+		let isError: bool = false;
+		let error: string = "";
+		// преобразовываем в строку
+		formData.current.passNum = (String(formData.current.passNum) ?? "");
+		formData.current.passSer = (String(formData.current.passSer) ?? "");
+		// создаём массив для разбития на каждый символ
+		const passNumchk: char[] = [...formData.current.passNum];
+		const passSerchk: char[] = [...formData.current.passSer];
+		const availableNums: char[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+		// проверяем, действительно ли в массивы попали один символ в ключе затем на цифры
+		for (const charnum of passNumchk) {
+			if (charnum.length == 1) {
+				if (availableNums.includes(charnum)) continue;
+				else {
+					error = "Введите корректный номер паспорта";
+					break;
+				}
+			} else {
+				console.error(`Type '${typeof charnum} is not assignable to type 'char'`);
+			}
+		}
+		for (const charser of passSerchk) {
+			if (charnum.length == 1) {
+				if (availableNums.includes(charnum)) continue;
+				else {
+					error = "Введите корректную серию паспорта";
+					break;
+				} 
+			} else {
+				console.error(`Type '${typeof charnum} is not assignable to type 'char'`);
+				console.warn("React Render has lost control");
+			}
+		}
+		
+		if (formData.current.fio.length < 5 || formData.current.fiofsb < 5) {
+			error = "Введите корректно Ф.И.О / Ф.И.О. куратора ФСБ";
+		}
+		if (formData.current.fio.split(" ").length !== 3 || formData.current.fiofsb.split(" ").length !== 3) {
+			error = "Введите фамилию, имя и отчество через пробел";
+		
+		if (error !== "") {
+			setFormResult(prev => ({ ...prev, error: error }));
+		}
+		
+		setFormResult(prev => ({...prev, error: error || false, message: (error === "") ? error : (<div>Проходка</div>), showResult: true, header: (error != "") ? "Неточности!" : "Ожидайте"}));
 	};
 
 	function handleInput(e, type: string): void {
@@ -46,7 +91,7 @@ export default function RuForm({ ...props }) {
 		else if (type.toLowerCase() == "fiofsb") setFiofsb(e.target.value);
 		else if (type.toLowerCase() == "passnum") setPassNum(e.target.value);
 		else if (type.toLowerCase() == "passser") setPassSer(e.target.value);
-	}
+	} 
 	
 	return (
 		<>
@@ -68,11 +113,11 @@ export default function RuForm({ ...props }) {
 						<label htmlFor="passnum" className={styles.label1}>
 							№
 						</label>
-						<input type="number" id="passnum" className={styles.input} value={passNum} onChange={e => handleInput(e, "passNum")} />
+						<input type="number" id="passnum" minLength={6} maxLength={6} className={styles.input} value={passNum} onChange={e => handleInput(e, "passNum")} />
 						<label htmlFor="passser" className={styles.label2}>
 							СЕРИЯ
 						</label>
-						<input type="number" id="passser" className={styles.input} value={passSer} onChange={e => handleInput(e, "passSer")} />
+						<input type="number" id="passser" minLength={4} maxLength={4} className={styles.input} value={passSer} onChange={e => handleInput(e, "passSer")} />
 					</div>
 				</div>
 				<button className={styles.submit} onClick={submit}>
