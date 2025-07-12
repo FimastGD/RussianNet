@@ -128,7 +128,7 @@ export default function RuForm({ ...props }) {
 							className={styles.input}
 							value={passNum}
 							onChange={e => handleInput(e, "passNum")}
-							required
+							required={true}
 						/>
 						<label htmlFor="passser" className={styles.label2}>
 							СЕРИЯ
@@ -141,11 +141,11 @@ export default function RuForm({ ...props }) {
 							className={styles.input}
 							value={passSer}
 							onChange={e => handleInput(e, "passSer")}
-							required
+							required={true}
 						/>
 					</div>
 				</div>
-				<button className={styles.submit} onClick={submit}>
+				<button type="submit" className={styles.submit} onClick={submit}>
 					ЗАПРОСИТЬ ДОСТУП
 				</button>
 			</form>
