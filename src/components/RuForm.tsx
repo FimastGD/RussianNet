@@ -118,11 +118,11 @@ export default function RuForm({ ...props }) {
 		if (initialQueue <= 125) {
 			intervalSpeed = 1000; // 1 сек
 		} else if (initialQueue <= 799) {
-			intervalSpeed = 500; // 0.5 сек
+			intervalSpeed = 280; // 0.28 сек
 		} else if (initialQueue <= 2999) {
-			intervalSpeed = 200; // 0.2 сек
+			intervalSpeed = 80; // 0.08 сек
 		} else {
-			intervalSpeed = 100; // 0.1 сек
+			intervalSpeed = 40; // 0.04 сек
 		}
 
 		// начальное состояние модального окна
