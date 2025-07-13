@@ -48,7 +48,7 @@ export default function RuForm({ ...props }) {
 	});
 	const [successModal, setSuccessModal] = useState<SuccessModal>({
 		header: "Ожидайте",
-		description: ""
+		description: "Очередь"
 	});
 	
 	let queueIn: int = t.int(0);
@@ -98,26 +98,25 @@ export default function RuForm({ ...props }) {
 		if (Queue >= 50 && Queue <= 150) {
 			const queueInterval = setInterval(() => {
 				console.log(Queue, $i_interval_Xt6k);
+				console.info("debug:", formResult)
 				if ($i_interval_Xt6k <= 0) {
 					clearInterval(queueInterval);
 					setSuccessModal(prev => ({header: "Успешно", description: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ"}));
 				}
 				setQueue($i_interval_Xt6k);
-				setSuccessModal(prev => ({...prev, description: <>Наши сверхбыстрые сервера обрабатывают запросы<br/>Очередь: {queue}</>}))
+				setSuccessModal(prev => ({...prev, description: <>Наши сверхбыстрые сервера обрабатывают запросы<br/>Очередь: {queue}</>}));
+				setFormResult({
+					error: false,
+					header: <>{successModal.header}</>,
+					message: <>{successModal.description}</>,
+					showResult: true
+				});
 				$i_interval_Xt6k--;
 			}, 1000)
 		}
+	}
 
-		// если все проверки пройдены
 		
-		setFormResult({
-			error: false,
-			header: <>{successModal.header}</>,
-			message: <>{successModal.description}</>,
-			showResult: true
-		});
-	};
-
 	function handleInput(e: React.ChangeEvent<HTMLInputElement>, type: string): void {
 		const value = e.target.value;
 		if (type.toLowerCase() === "fio") setFio(value);
