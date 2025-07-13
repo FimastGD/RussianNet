@@ -238,6 +238,13 @@ $hColor: #ffbf19;
 	}
 }
 
+.area {
+	background-color: #fff;
+	color: #000;
+	width: 350px;
+	height: 140px;
+}
+
 .submit {
 	background-color: #ff8080;
 	color: #fff;
@@ -308,6 +315,10 @@ $hColor: #ffbf19;
 		position: relative;
 		padding: 5px;
 	}
+}
+
+.blue-text {
+	color: #78c2ff;
 }
 
 

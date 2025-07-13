@@ -148,7 +148,7 @@ export default function RuForm({ ...props }) {
 				setFormResult({
 					error: false,
 					header: "Успешно",
-					message: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ",
+					message: <>Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ<br /><div className={styles["blue-text"]}>Слово FimastGD: <i>«К сожалению, полноценного функционала нет, так как я лишь повторил элементы страницы.»</i></div></>,
 					showResult: true,
 					buttonLabel: "ЗАКРЫТЬ"
 				});
