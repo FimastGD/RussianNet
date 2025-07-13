@@ -6,7 +6,7 @@ import Random from "@/utils/Random";
 import RuModal from "@/components/RuModal";
 
 type Error = string | false;
-type Header<Extends> = Extends;
+type Header<Extends> = Extends | React.ReactNode;
 type bool = true | false;
 type char = string;
 type int = number;
@@ -97,6 +97,7 @@ export default function RuForm({ ...props }) {
 	
 		if (Queue >= 50 && Queue <= 150) {
 			const queueInterval = setInterval(() => {
+				console.log(Queue, $i_interval_Xt6k);
 				if ($i_interval_Xt6k <= 0) {
 					clearInterval(queueInterval);
 					setSuccessModal(prev => ({header: "Успешно", description: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ"}));
