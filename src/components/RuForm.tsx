@@ -191,7 +191,6 @@ export default function RuForm({ ...props }) {
 						value={fio}
 						onChange={e => handleInput(e, "fio")}
 						minLength={5}
-						placeholder="Иванов Иван Иванович"
 					/>
 
 					<label htmlFor="fiofsb" className={styles.label}>
@@ -205,7 +204,6 @@ export default function RuForm({ ...props }) {
 						value={fiofsb}
 						onChange={e => handleInput(e, "fiofsb")}
 						minLength={5}
-						placeholder="Петров Петр Петрович"
 					/>
 				</div>
 				<div className={styles.passGroup}>
@@ -224,7 +222,6 @@ export default function RuForm({ ...props }) {
 							pattern="\d{6}"
 							title="Введите ровно 6 цифр"
 							inputMode="numeric"
-							placeholder="123456"
 						/>
 						<label htmlFor="passser" className={styles.label2}>
 							СЕРИЯ
@@ -239,7 +236,6 @@ export default function RuForm({ ...props }) {
 							pattern="\d{4}"
 							title="Введите ровно 4 цифры"
 							inputMode="numeric"
-							placeholder="1234"
 						/>
 					</div>
 				</div>
