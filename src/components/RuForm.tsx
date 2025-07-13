@@ -16,6 +16,7 @@ interface FormResult {
 	header: Header<Error>;
 	message: string | React.ReactNode;
 	showResult: bool;
+	buttonLabel?: string;
 }
 
 const t: { int: (number) => number } = {
@@ -38,13 +39,14 @@ export default function RuForm({ ...props }) {
 		error: false,
 		header: "",
 		message: "",
-		showResult: false
+		showResult: false,
+		buttonLabel: ""
 	});
 
 	const formRef = useRef<HTMLFormElement>(null);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Очистка интервала при размонтировании
+	// очистка интервала при размонтировании
 	useEffect(() => {
 		return () => {
 			if (intervalRef.current) clearInterval(intervalRef.current);
@@ -61,10 +63,10 @@ export default function RuForm({ ...props }) {
 				setFiofsb(value);
 				break;
 			case "passnum":
-				setPassNum(value.slice(0, 6));
+				setPassNum(value.replace(/\D/g, "").slice(0, 6));
 				break;
 			case "passser":
-				setPassSer(value.slice(0, 4));
+				setPassSer(value.replace(/\D/g, "").slice(0, 4));
 				break;
 		}
 	};
@@ -86,23 +88,44 @@ export default function RuForm({ ...props }) {
 			error = "Введите корректно Ф.И.О / Ф.И.О. куратора ФСБ";
 		}
 
+		if (passNum.length !== 6) {
+			error = "Номер паспорта должен содержать 6 цифр";
+		}
+
+		if (passSer.length !== 4) {
+			error = "Серия паспорта должна содержать 4 цифры";
+		}
+
 		if (error) {
 			setFormResult({
 				error: error,
 				header: "Неточности!",
 				message: error,
-				showResult: true
+				showResult: true,
+				buttonLabel: "ИСПРАВИТЬ"
 			});
 			return;
 		}
 
-		// Очищаем предыдущий интервал
+		// очищаем предыдущий интервал
 		if (intervalRef.current) clearInterval(intervalRef.current);
 
-		const initialQueue: int = t.int(Random.Int(50, 150));
+		const initialQueue: int = t.int(Random.Int(50, 9999));
 		let count = initialQueue;
 
-		// Начальное состояние модального окна
+		// определяем скорость интервала в зависимости от размера очереди
+		let intervalSpeed: number;
+		if (initialQueue <= 125) {
+			intervalSpeed = 1000; // 1 сек
+		} else if (initialQueue <= 799) {
+			intervalSpeed = 500; // 0.5 сек
+		} else if (initialQueue <= 2999) {
+			intervalSpeed = 200; // 0.2 сек
+		} else {
+			intervalSpeed = 100; // 0.1 сек
+		}
+
+		// начальное состояние модального окна
 		setFormResult({
 			error: false,
 			header: "Ожидайте",
@@ -110,10 +133,11 @@ export default function RuForm({ ...props }) {
 				<>
 					Наши сверхбыстрые сервера обрабатывают запросы
 					<br />
-					Очередь: {count}
+					Очередь: {count.toLocaleString("ru-RU")}
 				</>
 			),
-			showResult: true
+			showResult: true,
+			buttonLabel: ""
 		});
 
 		intervalRef.current = setInterval(() => {
@@ -125,7 +149,8 @@ export default function RuForm({ ...props }) {
 					error: false,
 					header: "Успешно",
 					message: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ",
-					showResult: true
+					showResult: true,
+					buttonLabel: "ЗАКРЫТЬ"
 				});
 				return;
 			}
@@ -136,11 +161,11 @@ export default function RuForm({ ...props }) {
 					<>
 						Наши сверхбыстрые сервера обрабатывают запросы
 						<br />
-						Очередь: {count}
+						Очередь: {count.toLocaleString("ru-RU")}
 					</>
 				)
 			}));
-		}, 1000);
+		}, intervalSpeed);
 	};
 
 	const onCloseModal = () => {
@@ -158,7 +183,16 @@ export default function RuForm({ ...props }) {
 					<label htmlFor="fio" className={styles.label}>
 						Ф. И. О
 					</label>
-					<input type="text" required id="fio" className={styles.input} value={fio} onChange={e => handleInput(e, "fio")} minLength={5} />
+					<input
+						type="text"
+						required
+						id="fio"
+						className={styles.input}
+						value={fio}
+						onChange={e => handleInput(e, "fio")}
+						minLength={5}
+						placeholder="Иванов Иван Иванович"
+					/>
 
 					<label htmlFor="fiofsb" className={styles.label}>
 						Ф. И. О. КУРАТОРА ФСБ
@@ -171,6 +205,7 @@ export default function RuForm({ ...props }) {
 						value={fiofsb}
 						onChange={e => handleInput(e, "fiofsb")}
 						minLength={5}
+						placeholder="Петров Петр Петрович"
 					/>
 				</div>
 				<div className={styles.passGroup}>
@@ -188,6 +223,8 @@ export default function RuForm({ ...props }) {
 							required
 							pattern="\d{6}"
 							title="Введите ровно 6 цифр"
+							inputMode="numeric"
+							placeholder="123456"
 						/>
 						<label htmlFor="passser" className={styles.label2}>
 							СЕРИЯ
@@ -201,6 +238,8 @@ export default function RuForm({ ...props }) {
 							required
 							pattern="\d{4}"
 							title="Введите ровно 4 цифры"
+							inputMode="numeric"
+							placeholder="1234"
 						/>
 					</div>
 				</div>
@@ -212,8 +251,8 @@ export default function RuForm({ ...props }) {
 			{formResult.showResult && (
 				<RuModal
 					header={formResult.header}
-					buttonShow={!!formResult.error}
-					buttonLabel={formResult.error ? "ИСПРАВИТЬ" : ""}
+					buttonShow={!!formResult.buttonLabel}
+					buttonLabel={formResult.buttonLabel || ""}
 					onClose={onCloseModal}
 				>
 					{formResult.message}
