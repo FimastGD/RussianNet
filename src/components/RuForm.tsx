@@ -18,13 +18,8 @@ interface FormResult {
 	showResult: bool;
 }
 
-interface SuccessModal {
-	header: string;
-	description: string | React.ReactNode;
-}
-
-const t: {int: (number) => number} = {
-	int: (num) => {
+const t: { int: (number) => number } = {
+	int: num => {
 		if (String(num).includes(".")) {
 			console.error("Type 'int' is not assignable to type 'number'");
 			return 0;
@@ -32,53 +27,62 @@ const t: {int: (number) => number} = {
 			return num;
 		}
 	}
-}
+};
 
 export default function RuForm({ ...props }) {
 	const [fio, setFio] = useState("");
 	const [fiofsb, setFiofsb] = useState("");
 	const [passNum, setPassNum] = useState("");
 	const [passSer, setPassSer] = useState("");
-	const [queue, setQueue] = useState<int>(0);
-	const [formResult, setFormResult] = useState<FormResult>({ 
-		error: false, 
-		header: "", 
-		message: "", 
-		showResult: false 
+	const [formResult, setFormResult] = useState<FormResult>({
+		error: false,
+		header: "",
+		message: "",
+		showResult: false
 	});
-	const [successModal, setSuccessModal] = useState<SuccessModal>({
-		header: "Ожидайте",
-		description: "Очередь"
-	});
-	
-	let queueIn: int = t.int(0);
-	const formRef = useRef<HTMLFormElement>(null);
-	const formData = useRef({ fio, fiofsb, passNum, passSer });
 
+	const formRef = useRef<HTMLFormElement>(null);
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Очистка интервала при размонтировании
 	useEffect(() => {
-		formData.current = { fio, fiofsb, passNum, passSer };
-	}, [fio, fiofsb, passNum, passSer]);
-	useEffect(() => {
-		queueIn = queue;
-	}, [queue]);
+		return () => {
+			if (intervalRef.current) clearInterval(intervalRef.current);
+		};
+	}, []);
+
+	const handleInput = (e: React.ChangeEvent<HTMLInputElement>, type: string): void => {
+		const value = e.target.value;
+		switch (type.toLowerCase()) {
+			case "fio":
+				setFio(value);
+				break;
+			case "fiofsb":
+				setFiofsb(value);
+				break;
+			case "passnum":
+				setPassNum(value.slice(0, 6));
+				break;
+			case "passser":
+				setPassSer(value.slice(0, 4));
+				break;
+		}
+	};
 
 	const submit = (e: FormEvent) => {
 		e.preventDefault();
-		
-		// проверяем нативную валидацию
+
 		if (!formRef.current?.checkValidity()) {
 			formRef.current?.reportValidity();
 			return;
 		}
+
 		let error: string = "";
-		
-		if (formData.current.fio.split(" ").length !== 3 || 
-				formData.current.fiofsb.split(" ").length !== 3) {
+		if (fio.split(" ").length !== 3 || fiofsb.split(" ").length !== 3) {
 			error = "Введите фамилию, имя и отчество через пробел";
 		}
 
-		if (String(formData.current.fio).length < 5 || 
-				String(formData.current.fiofsb).length < 5) {
+		if (fio.length < 5 || fiofsb.length < 5) {
 			error = "Введите корректно Ф.И.О / Ф.И.О. куратора ФСБ";
 		}
 
@@ -91,74 +95,81 @@ export default function RuForm({ ...props }) {
 			});
 			return;
 		}
-		
-		const Queue: int = t.int(Random.Int(50, 150))
-		let $i_interval_Xt6k: int = t.int(Queue); 
-	
-		if (Queue >= 50 && Queue <= 150) {
-			const queueInterval = setInterval(() => {
-				console.log(Queue, $i_interval_Xt6k);
-				console.info("debug:", formResult)
-				if ($i_interval_Xt6k <= 0) {
-					clearInterval(queueInterval);
-					setSuccessModal(prev => ({header: "Успешно", description: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ"}));
-				}
-				setQueue($i_interval_Xt6k);
-				setSuccessModal(prev => ({...prev, description: <>Наши сверхбыстрые сервера обрабатывают запросы<br/>Очередь: {queue}</>}));
+
+		// Очищаем предыдущий интервал
+		if (intervalRef.current) clearInterval(intervalRef.current);
+
+		const initialQueue: int = t.int(Random.Int(50, 150));
+		let count = initialQueue;
+
+		// Начальное состояние модального окна
+		setFormResult({
+			error: false,
+			header: "Ожидайте",
+			message: (
+				<>
+					Наши сверхбыстрые сервера обрабатывают запросы
+					<br />
+					Очередь: {count}
+				</>
+			),
+			showResult: true
+		});
+
+		intervalRef.current = setInterval(() => {
+			count--;
+
+			if (count <= 0) {
+				clearInterval(intervalRef.current!);
 				setFormResult({
 					error: false,
-					header: <>{successModal.header}</>,
-					message: <>{successModal.description}</>,
+					header: "Успешно",
+					message: "Вы подключились к Российской Сети, в ближайшее время с вами свяжется куратор ФСБ",
 					showResult: true
 				});
-				$i_interval_Xt6k--;
-			}, 1000)
-		}
-	}
+				return;
+			}
 
-		
-	function handleInput(e: React.ChangeEvent<HTMLInputElement>, type: string): void {
-		const value = e.target.value;
-		if (type.toLowerCase() === "fio") setFio(value);
-		else if (type.toLowerCase() === "fiofsb") setFiofsb(value);
-		else if (type.toLowerCase() === "passnum") setPassNum(value.slice(0, 6)); // Ограничение длины
-		else if (type.toLowerCase() === "passser") setPassSer(value.slice(0, 4)); // Ограничение длины
-	}
+			setFormResult(prev => ({
+				...prev,
+				message: (
+					<>
+						Наши сверхбыстрые сервера обрабатывают запросы
+						<br />
+						Очередь: {count}
+					</>
+				)
+			}));
+		}, 1000);
+	};
+
+	const onCloseModal = () => {
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+		setFormResult(prev => ({ ...prev, showResult: false }));
+	};
 
 	return (
 		<>
-			<form 
-				ref={formRef}
-				className={styles.form} 
-				{...props} 
-				onSubmit={submit}
-				id="Y6mUx"
-				noValidate // Отключаем стандартное поведение, чтобы контролировать момент проверки
-			>
+			<form ref={formRef} className={styles.form} {...props} onSubmit={submit} id="Y6mUx" noValidate>
 				<div className={styles.inputGroup}>
 					<label htmlFor="fio" className={styles.label}>
 						Ф. И. О
 					</label>
-					<input 
-						type="text" 
-						required 
-						id="fio" 
-						className={styles.input} 
-						value={fio} 
-						onChange={e => handleInput(e, "fio")} 
-						minLength={5}
-					/>
+					<input type="text" required id="fio" className={styles.input} value={fio} onChange={e => handleInput(e, "fio")} minLength={5} />
 
 					<label htmlFor="fiofsb" className={styles.label}>
 						Ф. И. О. КУРАТОРА ФСБ
 					</label>
-					<input 
-						type="text" 
-						required 
-						id="fiofsb" 
-						className={styles.input} 
-						value={fiofsb} 
-						onChange={e => handleInput(e, "fiofsb")} 
+					<input
+						type="text"
+						required
+						id="fiofsb"
+						className={styles.input}
+						value={fiofsb}
+						onChange={e => handleInput(e, "fiofsb")}
 						minLength={5}
 					/>
 				</div>
@@ -197,13 +208,13 @@ export default function RuForm({ ...props }) {
 					ЗАПРОСИТЬ ДОСТУП
 				</button>
 			</form>
-			
+
 			{formResult.showResult && (
 				<RuModal
 					header={formResult.header}
 					buttonShow={!!formResult.error}
 					buttonLabel={formResult.error ? "ИСПРАВИТЬ" : ""}
-					onClose={() => setFormResult(prev => ({ ...prev, showResult: false }))}
+					onClose={onCloseModal}
 				>
 					{formResult.message}
 				</RuModal>
